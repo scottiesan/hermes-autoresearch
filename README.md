@@ -1,6 +1,6 @@
 # Hermes Autoresearch
 
-Hermes Autoresearch is a CLI-first supervisor for measurable engineering improvement loops. Hermes supervises the run, Codex CLI acts as the worker, and git is used to retain improvements while reverting failed attempts.
+Hermes Autoresearch is a CLI-first supervisor for measurable engineering improvement loops, built for [Nous Research Hermes Agent](https://github.com/nousresearch/hermes-agent). Hermes supervises the run, Codex CLI acts as the worker, and git is used to retain improvements while reverting failed attempts.
 
 The loop is:
 
@@ -12,7 +12,7 @@ The loop is:
 6. Revert rejected changes.
 7. Write run logs under `autoresearch-results/`.
 
-This project is inspired by `codex-autoresearch`, but is designed to be Hermes-native and deliberately starts as a CLI plus Hermes skill. It does not include an MCP server yet.
+This project is inspired by `codex-autoresearch`, but is designed to be Hermes-native for `nousresearch/hermes-agent` and deliberately starts as a CLI plus Hermes skill. It does not include an MCP server yet.
 
 ## Install
 

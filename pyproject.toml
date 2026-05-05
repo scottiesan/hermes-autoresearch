@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hermes-autoresearch"
 version = "0.1.0"
-description = "Hermes-native autoresearch supervisor using Codex CLI workers."
+description = "Hermes Agent autoresearch supervisor using Codex CLI workers."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -35,6 +35,11 @@ dev = [
 
 [project.scripts]
 hermes-autoresearch = "scripts.hermes_autoresearch:main"
+
+[project.urls]
+Homepage = "https://github.com/scottiesan/hermes-autoresearch"
+Repository = "https://github.com/scottiesan/hermes-autoresearch"
+"Hermes Agent" = "https://github.com/nousresearch/hermes-agent"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

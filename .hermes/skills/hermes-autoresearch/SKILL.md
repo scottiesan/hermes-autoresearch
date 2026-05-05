@@ -1,11 +1,11 @@
 ---
 name: hermes-autoresearch
-description: Supervise command-verifiable autoresearch loops where Hermes manages safety, scoring, commits, and reverts while Codex CLI makes one atomic worker change per iteration.
+description: Supervise command-verifiable autoresearch loops for Nous Research Hermes Agent, where Hermes manages safety, scoring, commits, and reverts while Codex CLI makes one atomic worker change per iteration.
 ---
 
 # Hermes Autoresearch
 
-Use this skill when Hermes should supervise a measurable engineering improvement loop and Codex CLI should act only as the worker code agent. Good targets include reducing failing tests, lint warnings, type errors, latency scores, grep counts, or any command-verifiable metric.
+Use this skill with [Nous Research Hermes Agent](https://github.com/nousresearch/hermes-agent) when Hermes should supervise a measurable engineering improvement loop and Codex CLI should act only as the worker code agent. Good targets include reducing failing tests, lint warnings, type errors, latency scores, grep counts, or any command-verifiable metric.
 
 Do not use this skill for live trading, direct production execution, credential rotation, or broad product redesigns without a deterministic verification command.
 

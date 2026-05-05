@@ -1,6 +1,6 @@
 # Hermes Autoresearch
 
-Hermes Autoresearch is a CLI-first supervisor loop for measurable engineering goals. Hermes owns the run, safety checks, scoring, commits, reverts, and logs. Codex CLI is used as a worker that makes exactly one atomic code change per iteration.
+Hermes Autoresearch is a CLI-first supervisor loop for measurable engineering goals, built for [Nous Research Hermes Agent](https://github.com/nousresearch/hermes-agent). Hermes owns the run, safety checks, scoring, commits, reverts, and logs. Codex CLI is used as a worker that makes exactly one atomic code change per iteration.
 
 The loop is:
 
