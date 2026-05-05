@@ -1,0 +1,52 @@
+name: hermes-autoresearch
+repo_path: /absolute/path/to/repo
+branch_prefix: autoresearch
+
+goal: "Improve a command-verifiable engineering metric"
+
+scope:
+  - src/
+  - tests/
+
+metric:
+  command: "pytest -q"
+  parser: failing_tests
+  direction: lower
+
+verify:
+  command: "pytest -q"
+
+guard:
+  command: "python -m compileall ."
+
+safety:
+  require_clean_git: true
+  forbid_paths:
+    - ".env"
+    - ".env.local"
+    - "secrets/"
+    - "*.key"
+    - "*.pem"
+    - "wallet.dat"
+  forbid_patterns:
+    - "EXECUTION_ENABLED=true"
+    - "LIVE_TRADING=true"
+    - "place_order("
+    - "submit_order("
+    - "send_order("
+
+agent:
+  type: codex_cli
+  command: "codex exec"
+  timeout_seconds: 900
+
+loop:
+  max_iterations: 10
+  one_atomic_change: true
+  revert_on_fail: true
+  commit_on_success: true
+
+results:
+  dir: autoresearch-results
+  save_diff: true
+  save_logs: true

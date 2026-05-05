@@ -1,0 +1,54 @@
+name: trading-harness-autoresearch
+repo_path: /Users/scottho/trading-data-tools/hermes_trading_harness
+branch_prefix: autoresearch-trading-harness
+
+goal: "Improve paper-trading harness reliability without enabling live execution"
+
+scope:
+  - hermes_trading_harness/
+  - tests/
+  - scripts/
+
+metric:
+  command: "pytest -q"
+  parser: failing_tests
+  direction: lower
+
+verify:
+  command: "pytest -q"
+
+guard:
+  command: "python -m compileall . && ! grep -R \"EXECUTION_ENABLED=true\" ."
+
+safety:
+  require_clean_git: true
+  forbid_paths:
+    - ".env"
+    - ".env.local"
+    - "secrets/"
+    - "*.key"
+    - "*.pem"
+    - "wallet.dat"
+  forbid_patterns:
+    - "EXECUTION_ENABLED=true"
+    - "LIVE_TRADING=true"
+    - "place_order("
+    - "submit_order("
+    - "send_order("
+    - "real_money"
+
+agent:
+  type: codex_cli
+  command: "codex exec"
+  timeout_seconds: 900
+
+loop:
+  max_iterations: 10
+  one_atomic_change: true
+  revert_on_fail: true
+  commit_on_success: true
+
+results:
+  dir: autoresearch-results
+  save_diff: true
+  save_logs: true

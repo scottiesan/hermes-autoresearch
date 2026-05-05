@@ -1,0 +1,56 @@
+name: generic-python-autoresearch
+repo_path: .
+branch_prefix: autoresearch-generic-python
+
+goal: "Reduce failing tests in a Python project with one safe atomic change at a time"
+
+scope:
+  - .hermes/
+  - docs/
+  - examples/
+  - src/
+  - tests/
+  - scripts/
+
+metric:
+  command: "pytest -q"
+  parser: failing_tests
+  direction: lower
+
+verify:
+  command: "pytest -q"
+
+guard:
+  command: "python -m compileall ."
+
+safety:
+  require_clean_git: true
+  forbid_paths:
+    - ".env"
+    - ".env.local"
+    - "secrets/"
+    - "*.key"
+    - "*.pem"
+    - "wallet.dat"
+  forbid_patterns:
+    - "EXECUTION_ENABLED=true"
+    - "LIVE_TRADING=true"
+    - "place_order("
+    - "submit_order("
+    - "send_order("
+
+agent:
+  type: codex_cli
+  command: "codex exec"
+  timeout_seconds: 900
+
+loop:
+  max_iterations: 1
+  one_atomic_change: true
+  revert_on_fail: true
+  commit_on_success: true
+
+results:
+  dir: autoresearch-results
+  save_diff: true
+  save_logs: true
