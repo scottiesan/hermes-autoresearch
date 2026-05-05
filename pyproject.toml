@@ -35,6 +35,7 @@ dev = [
 
 [project.scripts]
 hermes-autoresearch = "scripts.hermes_autoresearch:main"
+hermes-autoresearch-install-skill = "scripts.install_hermes_skill:main"
 
 [project.urls]
 Homepage = "https://github.com/scottiesan/hermes-autoresearch"

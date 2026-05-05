@@ -8,6 +8,7 @@ Keep this project small, auditable, and safe by default.
 python -m pip install -e ".[dev]"
 pytest -q
 python scripts/hermes_autoresearch.py --config examples/autoresearch.generic-python.yaml --dry-run
+python scripts/install_hermes_skill.py --profile coder --category software-development --dry-run
 ```
 
 ## Safety Expectations

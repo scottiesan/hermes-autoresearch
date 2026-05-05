@@ -1,0 +1,9 @@
+name: hermes-autoresearch
+description: Hermes Agent autoresearch supervisor skill using Codex CLI workers.
+target: https://github.com/nousresearch/hermes-agent
+skill_path: .hermes/skills/hermes-autoresearch
+default_profile: coder
+default_category: software-development
+install:
+  command: python scripts/install_hermes_skill.py --profile coder --category software-development
+  from_git_url: python scripts/install_hermes_skill.py --source https://github.com/scottiesan/hermes-autoresearch --profile coder --category software-development

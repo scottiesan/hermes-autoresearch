@@ -26,6 +26,43 @@ python scripts/hermes_autoresearch.py report --config examples/autoresearch.gene
 
 The generic config uses `pytest -q`, the `failing_tests` parser, and a `python -m compileall .` guard.
 
+## Installing The Hermes Skill
+
+From a cloned checkout:
+
+```bash
+python scripts/install_hermes_skill.py --profile coder --category software-development
+```
+
+From the public GitHub URL:
+
+```bash
+python scripts/install_hermes_skill.py \
+  --source https://github.com/scottiesan/hermes-autoresearch \
+  --profile coder \
+  --category software-development
+```
+
+The installer copies `.hermes/skills/hermes-autoresearch` into:
+
+```text
+~/.hermes/profiles/<profile>/skills/<category>/hermes-autoresearch
+```
+
+Use `--dry-run` to preview and `--overwrite` to replace an existing install with a timestamped backup.
+
+If the Python package is installed, this also works from any directory. The installer will clone the public repo automatically when the current working directory is not a checkout:
+
+```bash
+hermes-autoresearch-install-skill --profile coder --category software-development
+```
+
+With `pipx`:
+
+```bash
+pipx run --spec git+https://github.com/scottiesan/hermes-autoresearch hermes-autoresearch-install-skill --profile coder --category software-development
+```
+
 ## Trading Harness Example
 
 ```bash

@@ -47,13 +47,33 @@ The Hermes skill lives at:
 .hermes/skills/hermes-autoresearch/SKILL.md
 ```
 
-Install it into a Hermes profile with your Hermes skill installer, for example:
+Install it into a Hermes profile from a cloned checkout:
 
 ```bash
-python3 /path/to/install_profile_skill.py \
-  --source .hermes/skills/hermes-autoresearch \
+python scripts/install_hermes_skill.py \
   --profile coder \
   --category software-development
+```
+
+Or point the installer at the public repo URL:
+
+```bash
+python scripts/install_hermes_skill.py \
+  --source https://github.com/scottiesan/hermes-autoresearch \
+  --profile coder \
+  --category software-development
+```
+
+If installed as a Python package, use the console script. When run outside a clone, it automatically pulls the skill from this public repo:
+
+```bash
+hermes-autoresearch-install-skill --profile coder --category software-development
+```
+
+One-command install from GitHub with `pipx`:
+
+```bash
+pipx run --spec git+https://github.com/scottiesan/hermes-autoresearch hermes-autoresearch-install-skill --profile coder --category software-development
 ```
 
 After installing, restart Hermes or Codex so the profile reloads skills.
