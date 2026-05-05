@@ -14,7 +14,39 @@ The loop is:
 
 This project is inspired by `codex-autoresearch`, but is designed to be Hermes-native for `nousresearch/hermes-agent` and deliberately starts as a CLI plus Hermes skill. It does not include an MCP server yet.
 
-## Install
+## Install The Hermes Skill
+
+Default one-command install for Hermes Agent:
+
+```bash
+pipx run --spec git+https://github.com/scottiesan/hermes-autoresearch hermes-autoresearch-install-skill --profile coder --category software-development
+```
+
+This copies the bundled skill into:
+
+```text
+~/.hermes/profiles/coder/skills/software-development/hermes-autoresearch
+```
+
+Restart Hermes after installation so the profile reloads skills.
+
+## Sample Usage Inside Hermes
+
+After installing the skill, ask Hermes:
+
+```text
+Use hermes-autoresearch on my repo. Goal: reduce failing pytest tests. Start with one dry-run plan, then run one iteration only if the repo is clean.
+```
+
+For a config-driven run:
+
+```text
+Use hermes-autoresearch with /path/to/autoresearch.yaml. Verify the plan first, then run the supervised loop.
+```
+
+Hermes should act as the supervisor. Codex CLI is only the worker that makes one atomic change per iteration.
+
+## Developer Install
 
 ```bash
 python -m pip install -e ".[dev]"
@@ -47,7 +79,7 @@ The Hermes skill lives at:
 .hermes/skills/hermes-autoresearch/SKILL.md
 ```
 
-Install it into a Hermes profile from a cloned checkout:
+The easiest install path is the `pipx` command at the top of this README. From a cloned checkout, you can also run:
 
 ```bash
 python scripts/install_hermes_skill.py \
@@ -68,12 +100,6 @@ If installed as a Python package, use the console script. When run outside a clo
 
 ```bash
 hermes-autoresearch-install-skill --profile coder --category software-development
-```
-
-One-command install from GitHub with `pipx`:
-
-```bash
-pipx run --spec git+https://github.com/scottiesan/hermes-autoresearch hermes-autoresearch-install-skill --profile coder --category software-development
 ```
 
 After installing, restart Hermes or Codex so the profile reloads skills.

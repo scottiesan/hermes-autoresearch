@@ -5,5 +5,9 @@ skill_path: .hermes/skills/hermes-autoresearch
 default_profile: coder
 default_category: software-development
 install:
+  default: pipx run --spec git+https://github.com/scottiesan/hermes-autoresearch hermes-autoresearch-install-skill --profile coder --category software-development
   command: python scripts/install_hermes_skill.py --profile coder --category software-development
   from_git_url: python scripts/install_hermes_skill.py --source https://github.com/scottiesan/hermes-autoresearch --profile coder --category software-development
+sample_usage:
+  - Use hermes-autoresearch on my repo. Goal: reduce failing pytest tests. Start with one dry-run plan, then run one iteration only if the repo is clean.
+  - Use hermes-autoresearch with /path/to/autoresearch.yaml. Verify the plan first, then run the supervised loop.

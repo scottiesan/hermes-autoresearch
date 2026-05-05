@@ -15,6 +15,42 @@ The loop is:
 9. Revert rejected changes.
 10. Write JSON and Markdown logs under `autoresearch-results/`.
 
+## Default Install
+
+For most Hermes Agent users, install the skill directly from GitHub with `pipx`:
+
+```bash
+pipx run --spec git+https://github.com/scottiesan/hermes-autoresearch hermes-autoresearch-install-skill --profile coder --category software-development
+```
+
+This copies the bundled skill into:
+
+```text
+~/.hermes/profiles/coder/skills/software-development/hermes-autoresearch
+```
+
+Restart Hermes after installation so the `coder` profile reloads skills.
+
+## Sample Usage Inside Hermes
+
+After installing the skill, ask Hermes:
+
+```text
+Use hermes-autoresearch on my repo. Goal: reduce failing pytest tests. Start with one dry-run plan, then run one iteration only if the repo is clean.
+```
+
+For a specific config:
+
+```text
+Use hermes-autoresearch with /path/to/autoresearch.yaml. Verify the plan first, then run the supervised loop.
+```
+
+For a trading harness:
+
+```text
+Use hermes-autoresearch with examples/autoresearch.trading-harness.yaml. Keep the run paper-only; never enable live execution or order placement.
+```
+
 ## Generic Example
 
 ```bash
@@ -28,7 +64,7 @@ The generic config uses `pytest -q`, the `failing_tests` parser, and a `python -
 
 ## Installing The Hermes Skill
 
-From a cloned checkout:
+The default install path is the `pipx` command above. From a cloned checkout:
 
 ```bash
 python scripts/install_hermes_skill.py --profile coder --category software-development
@@ -55,12 +91,6 @@ If the Python package is installed, this also works from any directory. The inst
 
 ```bash
 hermes-autoresearch-install-skill --profile coder --category software-development
-```
-
-With `pipx`:
-
-```bash
-pipx run --spec git+https://github.com/scottiesan/hermes-autoresearch hermes-autoresearch-install-skill --profile coder --category software-development
 ```
 
 ## Trading Harness Example

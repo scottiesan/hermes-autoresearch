@@ -35,7 +35,13 @@ Trading hard rule: never enable live execution and never place orders.
 
 ## How To Run
 
-From the project containing this skill:
+Default install command for users who have not installed this skill yet:
+
+```bash
+pipx run --spec git+https://github.com/scottiesan/hermes-autoresearch hermes-autoresearch-install-skill --profile coder --category software-development
+```
+
+From the project containing the CLI:
 
 ```bash
 python scripts/hermes_autoresearch.py plan --config examples/autoresearch.generic-python.yaml
@@ -43,6 +49,36 @@ python scripts/hermes_autoresearch.py --config examples/autoresearch.generic-pyt
 python scripts/hermes_autoresearch.py run --config autoresearch.yaml
 python scripts/hermes_autoresearch.py report --config autoresearch.yaml
 ```
+
+If the package is installed, use:
+
+```bash
+hermes-autoresearch plan --config autoresearch.yaml
+hermes-autoresearch run --config autoresearch.yaml
+hermes-autoresearch report --config autoresearch.yaml
+```
+
+## Sample Usage Inside Hermes
+
+User prompt:
+
+```text
+Use hermes-autoresearch on my repo. Goal: reduce failing pytest tests. Start with one dry-run plan, then run one iteration only if the repo is clean.
+```
+
+Config-driven prompt:
+
+```text
+Use hermes-autoresearch with /path/to/autoresearch.yaml. Verify the plan first, then run the supervised loop.
+```
+
+Trading prompt:
+
+```text
+Use hermes-autoresearch with examples/autoresearch.trading-harness.yaml. Keep the run paper-only; never enable live execution or order placement.
+```
+
+Hermes must act as supervisor. Do not edit code directly as Hermes during the loop; let Codex CLI make one atomic worker change per iteration, then verify, score, accept, or revert.
 
 ## Expected Outputs
 
