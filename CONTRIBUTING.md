@@ -11,6 +11,8 @@ python scripts/hermes_autoresearch.py --config examples/autoresearch.generic-pyt
 python scripts/install_hermes_skill.py --profile coder --category software-development --dry-run
 ```
 
+CI must stay green across the supported Python matrix before release.
+
 ## Safety Expectations
 
 - Do not add live trading execution.

@@ -2,6 +2,8 @@
 
 Hermes Autoresearch is a CLI-first supervisor loop for measurable engineering goals, built for [Nous Research Hermes Agent](https://github.com/nousresearch/hermes-agent). Hermes owns the run, safety checks, scoring, commits, reverts, and logs. Codex CLI is used as a worker that makes exactly one atomic code change per iteration.
 
+Status: beta. The CLI and installer are covered by unit and config-driven integration tests, and CI runs against Python 3.10 through 3.13.
+
 The loop is:
 
 1. Load and validate YAML config.
@@ -116,10 +118,29 @@ Supported directions:
 - `lower`: accept smaller scores.
 - `higher`: accept larger scores.
 
+Production config rules:
+
+- `repo_path` must point at an existing git repository for real runs.
+- `results.dir` must be a relative path inside `repo_path`.
+- `scope`, `safety.forbid_paths`, and `safety.forbid_patterns` must be explicit string lists.
+- `agent.timeout_seconds` and `loop.max_iterations` must be positive integers.
+- `agent.command` is parsed as argv and receives the worker prompt on stdin.
+- `metric.command`, `verify.command`, and `guard.command` execute through the local shell and must be treated as trusted code.
+
+## Production Checklist
+
+- CI is passing on the target commit.
+- The target repo is clean before starting.
+- The config has been reviewed by a human.
+- `loop.max_iterations` starts at `1` for new repositories.
+- The guard command checks for project-specific safety invariants.
+- Trading repos include live-execution and order-placement forbidden patterns.
+- Accepted commits are reviewed before merging to a protected branch.
+
 ## Limitations
 
 - This is intentionally not an MCP server.
-- The first implementation uses shell commands from the config, so configs should be reviewed before running.
+- Config commands execute through the local shell, so configs should be reviewed before running.
 - The Codex worker command must be available locally for non-dry runs.
 - Scoring is command-output based and should be deterministic.
 

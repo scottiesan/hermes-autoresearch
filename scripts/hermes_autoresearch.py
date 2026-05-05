@@ -42,6 +42,7 @@ class RunCommandResult:
     returncode: int
     stdout: str
     stderr: str
+    timed_out: bool = False
 
     @property
     def combined(self) -> str:
@@ -62,33 +63,132 @@ def load_config(path: Path) -> dict[str, Any]:
     return data
 
 
+def require_mapping(config: dict[str, Any], key: str) -> dict[str, Any]:
+    value = config.get(key)
+    if not isinstance(value, dict):
+        raise ValueError(f"{key} must be a mapping")
+    return value
+
+
+def require_string(mapping: dict[str, Any], key: str, section: str) -> str:
+    value = mapping.get(key)
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{section}.{key} must be a non-empty string")
+    return value
+
+
+def require_bool(mapping: dict[str, Any], key: str, section: str) -> None:
+    if key in mapping and not isinstance(mapping[key], bool):
+        raise ValueError(f"{section}.{key} must be true or false")
+
+
+def require_string_list(mapping: dict[str, Any], key: str, section: str, allow_empty: bool = True) -> None:
+    value = mapping.get(key, [])
+    if not isinstance(value, list) or (not allow_empty and not value):
+        raise ValueError(f"{section}.{key} must be a list")
+    if not all(isinstance(item, str) and item.strip() for item in value):
+        raise ValueError(f"{section}.{key} must contain only non-empty strings")
+
+
 def validate_config(config: dict[str, Any]) -> None:
     missing = [key for key in REQUIRED_TOP_LEVEL if key not in config]
     if missing:
         raise ValueError(f"missing required fields: {', '.join(missing)}")
-    if config["metric"].get("parser") not in {"failing_tests", "grep_count", "numeric_stdout", "exit_code"}:
+
+    for key in ("name", "repo_path", "branch_prefix", "goal"):
+        require_string(config, key, "config")
+
+    metric = require_mapping(config, "metric")
+    verify = require_mapping(config, "verify")
+    guard = require_mapping(config, "guard")
+    safety = require_mapping(config, "safety")
+    agent = require_mapping(config, "agent")
+    loop = require_mapping(config, "loop")
+    results = require_mapping(config, "results")
+
+    require_string(metric, "command", "metric")
+    require_string(metric, "parser", "metric")
+    require_string(metric, "direction", "metric")
+    require_string(verify, "command", "verify")
+    require_string(guard, "command", "guard")
+    require_string(agent, "type", "agent")
+    require_string(agent, "command", "agent")
+
+    if metric.get("parser") not in {"failing_tests", "grep_count", "numeric_stdout", "exit_code"}:
         raise ValueError("metric.parser must be failing_tests, grep_count, numeric_stdout, or exit_code")
-    if config["metric"].get("direction") not in {"lower", "higher"}:
+    if metric.get("direction") not in {"lower", "higher"}:
         raise ValueError("metric.direction must be lower or higher")
     if not isinstance(config.get("scope"), list) or not config["scope"]:
         raise ValueError("scope must be a non-empty list")
-    if config["agent"].get("type") != "codex_cli":
+    if not all(isinstance(item, str) and item.strip() for item in config["scope"]):
+        raise ValueError("scope must contain only non-empty strings")
+    if agent.get("type") != "codex_cli":
         raise ValueError("only agent.type=codex_cli is supported")
-    if int(config["loop"].get("max_iterations", 0)) < 1:
+    try:
+        max_iterations = int(loop.get("max_iterations", 0))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("loop.max_iterations must be an integer") from exc
+    if max_iterations < 1:
         raise ValueError("loop.max_iterations must be at least 1")
+    try:
+        timeout_seconds = int(agent.get("timeout_seconds", 900))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("agent.timeout_seconds must be an integer") from exc
+    if timeout_seconds < 1:
+        raise ValueError("agent.timeout_seconds must be at least 1")
+    require_bool(safety, "require_clean_git", "safety")
+    require_bool(safety, "allow_outside_scope", "safety")
+    require_string_list(safety, "forbid_paths", "safety")
+    require_string_list(safety, "forbid_patterns", "safety")
+    for key in ("one_atomic_change", "revert_on_fail", "commit_on_success"):
+        require_bool(loop, key, "loop")
+    require_string(results, "dir", "results")
+    results_dir = Path(str(results["dir"]))
+    if results_dir.is_absolute() or ".." in results_dir.parts:
+        raise ValueError("results.dir must be a relative path inside repo_path")
+    for key in ("save_diff", "save_logs"):
+        require_bool(results, key, "results")
 
 
-def run_command(command: str, cwd: Path, timeout: int | None = None) -> RunCommandResult:
-    proc = subprocess.run(
-        command,
-        cwd=str(cwd),
-        shell=True,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        timeout=timeout,
-    )
-    return RunCommandResult(proc.returncode, proc.stdout, proc.stderr)
+def run_command(command: str, cwd: Path, timeout: int | None = None, input_text: str | None = None) -> RunCommandResult:
+    try:
+        proc = subprocess.run(
+            command,
+            cwd=str(cwd),
+            shell=True,
+            text=True,
+            input=input_text,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=timeout,
+        )
+        return RunCommandResult(proc.returncode, proc.stdout, proc.stderr)
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout if isinstance(exc.stdout, str) else (exc.stdout or b"").decode(errors="replace")
+        stderr = exc.stderr if isinstance(exc.stderr, str) else (exc.stderr or b"").decode(errors="replace")
+        message = f"command timed out after {timeout} seconds: {command}"
+        stderr = "\n".join(part for part in (stderr, message) if part)
+        return RunCommandResult(124, stdout, stderr, timed_out=True)
+
+
+def run_argv(args: list[str], cwd: Path, timeout: int | None = None, input_text: str | None = None) -> RunCommandResult:
+    try:
+        proc = subprocess.run(
+            args,
+            cwd=str(cwd),
+            text=True,
+            input=input_text,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=timeout,
+        )
+        return RunCommandResult(proc.returncode, proc.stdout, proc.stderr)
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout if isinstance(exc.stdout, str) else (exc.stdout or b"").decode(errors="replace")
+        stderr = exc.stderr if isinstance(exc.stderr, str) else (exc.stderr or b"").decode(errors="replace")
+        message = f"command timed out after {timeout} seconds: {' '.join(args)}"
+        stderr = "\n".join(part for part in (stderr, message) if part)
+        return RunCommandResult(124, stdout, stderr, timed_out=True)
 
 
 def git(args: list[str], repo: Path, check: bool = True) -> RunCommandResult:
@@ -292,8 +392,12 @@ Stop after editing. Hermes will run verification, scoring, safety checks, commit
 
 
 def run_worker(config: dict[str, Any], repo: Path, prompt_path: Path, log_path: Path) -> RunCommandResult:
-    command = f"{config['agent']['command']} {shlex.quote(prompt_path.read_text(encoding='utf-8'))}"
-    result = run_command(command, repo, timeout=int(config["agent"].get("timeout_seconds", 900)))
+    result = run_argv(
+        shlex.split(config["agent"]["command"]),
+        repo,
+        timeout=int(config["agent"].get("timeout_seconds", 900)),
+        input_text=prompt_path.read_text(encoding="utf-8"),
+    )
     log_path.write_text(result.combined, encoding="utf-8")
     return result
 

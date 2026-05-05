@@ -2,7 +2,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-from scripts.hermes_autoresearch import decide_accept, is_path_forbidden, is_path_in_scope, run_loop, safety_check
+import pytest
+
+from scripts.hermes_autoresearch import decide_accept, is_path_forbidden, is_path_in_scope, run_loop, safety_check, validate_config
 
 
 def base_config(tmp_path: Path) -> dict:
@@ -80,6 +82,27 @@ def test_accepted_rejected_decision_logic():
     assert accepted is False
     assert did_improve is True
     assert reason == "guard command failed"
+
+
+def test_worker_failure_rejects_even_when_score_improves():
+    accepted, did_improve, reason = decide_accept(3, 2, "lower", False, True, True, "ok", None)
+    assert accepted is False
+    assert did_improve is True
+    assert reason == "worker command failed"
+
+
+def test_validate_config_rejects_results_dir_outside_repo(tmp_path):
+    config = base_config(tmp_path)
+    config["results"]["dir"] = "../outside"
+    with pytest.raises(ValueError, match="results.dir"):
+        validate_config(config)
+
+
+def test_validate_config_rejects_missing_agent_command(tmp_path):
+    config = base_config(tmp_path)
+    config["agent"]["command"] = ""
+    with pytest.raises(ValueError, match="agent.command"):
+        validate_config(config)
 
 
 def test_loop_can_run_one_mocked_accepted_iteration(tmp_path):

@@ -1,5 +1,7 @@
 # Hermes Autoresearch
 
+[![CI](https://github.com/scottiesan/hermes-autoresearch/actions/workflows/ci.yml/badge.svg)](https://github.com/scottiesan/hermes-autoresearch/actions/workflows/ci.yml)
+
 Hermes Autoresearch is a CLI-first supervisor for measurable engineering improvement loops, built for [Nous Research Hermes Agent](https://github.com/nousresearch/hermes-agent). Hermes supervises the run, Codex CLI acts as the worker, and git is used to retain improvements while reverting failed attempts.
 
 The loop is:
@@ -13,6 +15,8 @@ The loop is:
 7. Write run logs under `autoresearch-results/`.
 
 This project is inspired by `codex-autoresearch`, but is designed to be Hermes-native for `nousresearch/hermes-agent` and deliberately starts as a CLI plus Hermes skill. It does not include an MCP server yet.
+
+Status: beta. The core CLI, installer, safety checks, and config-driven end-to-end behavior are tested in CI. Use trusted configs only; YAML commands execute local shell commands by design.
 
 ## Install The Hermes Skill
 
@@ -116,6 +120,28 @@ The supervisor rejects changes that:
 - Cannot be scored.
 
 Trading hard rule: never enable live execution and never place orders.
+
+## Production Readiness
+
+This release is intended for supervised production engineering workflows where configs are reviewed before execution.
+
+Production controls included:
+
+- GitHub Actions CI on Python 3.10, 3.11, 3.12, and 3.13.
+- Config-file end-to-end tests through temporary git repositories.
+- Commit acceptance and rejection coverage.
+- Hermes skill installer tests.
+- Explicit clean-git requirement by default.
+- Scope, forbidden path, forbidden pattern, guard, no-change, and unscorable-result rejection.
+- Worker prompts passed over stdin instead of command-line arguments.
+- Worker command execution avoids shell interpolation; metric, verify, and guard commands remain trusted shell commands.
+
+Operational boundaries:
+
+- Treat autoresearch YAML files as trusted code.
+- Keep `loop.max_iterations` low until the metric and guard are stable.
+- Review accepted commits before merging autoresearch branches.
+- Use trading configs only for paper-trading or static reliability work.
 
 ## Examples
 
